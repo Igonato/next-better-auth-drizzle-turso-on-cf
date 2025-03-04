@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { nextCookies } from "better-auth/next-js";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 // import { reactResetPasswordEmail } from "./email/reset-password";
 // import { reactVerifyEmailEmail } from "./email/verify-email";
@@ -13,6 +14,7 @@ export const auth = betterAuth({
         provider: "sqlite",
         schema: { account, session, user, verification },
     }),
+    plugins: [nextCookies()],
     emailAndPassword: {
         enabled: true, // Enables email/password auth out of the box
         requireEmailVerification: !(process.env.VERIFY_EMAIL === "false"),
