@@ -12,15 +12,14 @@ const PasswordInput = React.forwardRef<
     React.InputHTMLAttributes<HTMLInputElement>
 >(({ className, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
-    const disabled =
-        props.value === "" || props.value === undefined || props.disabled;
+    const disabled = props.disabled;
 
     return (
         <div className="relative">
             <Input
                 {...props}
                 type={showPassword ? "text" : "password"}
-                name="password_fake"
+                name="password"
                 className={cn("hide-password-toggle pr-10", className)}
                 ref={ref}
             />
@@ -44,13 +43,13 @@ const PasswordInput = React.forwardRef<
 
             {/* hides browsers password toggles */}
             <style>{`
-					.hide-password-toggle::-ms-reveal,
-					.hide-password-toggle::-ms-clear {
-						visibility: hidden;
-						pointer-events: none;
-						display: none;
-					}
-				`}</style>
+                .hide-password-toggle::-ms-reveal,
+                .hide-password-toggle::-ms-clear {
+                    visibility: hidden;
+                    pointer-events: none;
+                    display: none;
+                }
+            `}</style>
         </div>
     );
 });

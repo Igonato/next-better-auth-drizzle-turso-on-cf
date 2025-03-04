@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, type ComponentPropsWithoutRef } from "react";
+import { useState, type ComponentPropsWithoutRef } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,19 +16,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { signInAction } from "@/lib/auth-actions";
+
+import { signIn } from "@/lib/auth-client";
 
 export type LoginFormProps = ComponentPropsWithoutRef<"div">;
 
-const initialState = {
-    error: null as string | null,
-};
-
 export function LoginForm({ className, ...props }: LoginFormProps) {
-    const [state, formAction, loading] = useActionState(
-        signInAction,
-        initialState,
-    );
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [rememberMe, setRememberMe] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -40,16 +38,20 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form action={formAction}>
+                    <form>
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
                                     id="email"
-                                    name="email"
                                     type="email"
                                     placeholder="m@example.com"
                                     required
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        setError("");
+                                    }}
+                                    value={email}
                                 />
                             </div>
                             <div className="grid gap-2">
@@ -64,17 +66,28 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                                 </div>
                                 <PasswordInput
                                     id="password"
+                                    value={password}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        setError("");
+                                    }}
                                     autoComplete="password"
                                     placeholder="Password"
                                 />
                             </div>
                             <div className="flex items-center space-x-2">
-                                <Checkbox id="remember" name="remember" />
+                                <Checkbox
+                                    id="remember"
+                                    checked={rememberMe}
+                                    onCheckedChange={(checked) =>
+                                        setRememberMe(checked as boolean)
+                                    }
+                                />
                                 <Label htmlFor="remember">Remember me</Label>
                             </div>
-                            {state.error && (
+                            {error && (
                                 <div className="text-sm text-red-500">
-                                    {state.error}
+                                    {error}
                                 </div>
                             )}
 
@@ -82,6 +95,29 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                                 type="submit"
                                 className="w-full"
                                 disabled={loading}
+                                onClick={async () => {
+                                    await signIn.email(
+                                        {
+                                            email: email,
+                                            password: password,
+                                            callbackURL: "/dashboard",
+                                            rememberMe,
+                                        },
+                                        {
+                                            onRequest: () => {
+                                                setLoading(true);
+                                                setError("");
+                                            },
+                                            onResponse: () => {
+                                                setLoading(false);
+                                            },
+                                            onError: (ctx) => {
+                                                setError(ctx.error.message);
+                                                setLoading(false);
+                                            },
+                                        },
+                                    );
+                                }}
                             >
                                 {loading ? (
                                     <Loader2
@@ -94,7 +130,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                             </Button>
                         </div>
                         <div className="mt-4 text-center text-sm">
-                            Don't have an account?{" "}
+                            Don&apos;t have an account?{" "}
                             <Link
                                 href="/sign-up"
                                 className="underline underline-offset-4"
