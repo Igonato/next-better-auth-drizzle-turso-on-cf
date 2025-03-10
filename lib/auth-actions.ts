@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export async function signInAction(
-    prevState: { error: string | null },
+    // prevState: { error: string | null },
     formData: FormData,
 ) {
     try {

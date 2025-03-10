@@ -1,4 +1,4 @@
-"use client";
+// "use client";
 
 import { useActionState, type ComponentPropsWithoutRef } from "react";
 import Link from "next/link";
@@ -25,10 +25,10 @@ const initialState = {
 };
 
 export function LoginForm({ className, ...props }: LoginFormProps) {
-    const [state, formAction, loading] = useActionState(
-        signInAction,
-        initialState,
-    );
+    // const [state, formAction, loading] = useActionState(
+    //     signInAction,
+    //     initialState,
+    // );
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -40,7 +40,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form action={formAction}>
+                    <form action={signInAction}>
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>
