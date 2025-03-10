@@ -1,5 +1,8 @@
-import { type ComponentPropsWithoutRef } from "react";
+"use client";
+
+import { useActionState, type ComponentPropsWithoutRef } from "react";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,13 +16,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { signInAction } from "@/lib/auth-actions";
-
-export const runtime = "edge";
+import { signInActionWithState } from "@/lib/auth-actions";
 
 export type LoginFormProps = ComponentPropsWithoutRef<"div">;
 
+const initialState = {
+    error: null as string | null,
+};
+
 export function LoginForm({ className, ...props }: LoginFormProps) {
+    const [state, formAction, loading] = useActionState(
+        signInActionWithState,
+        initialState,
+    );
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -30,7 +40,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form action={signInAction}>
+                    <form action={formAction}>
                         <div className="flex flex-col gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>
@@ -62,9 +72,25 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
                                 <Checkbox id="remember" name="remember" />
                                 <Label htmlFor="remember">Remember me</Label>
                             </div>
+                            {state.error && (
+                                <div className="text-sm text-red-500">
+                                    {state.error}
+                                </div>
+                            )}
 
-                            <Button type="submit" className="w-full">
-                                Login
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <Loader2
+                                        size={16}
+                                        className="animate-spin"
+                                    />
+                                ) : (
+                                    "Login"
+                                )}
                             </Button>
                         </div>
                         <div className="mt-4 text-center text-sm">

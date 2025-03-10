@@ -2,25 +2,32 @@
 
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
-export async function signInAction(
+export async function signInAction(formData: FormData) {
+    await cookies();
+    const email = formData.get("email") as string | null;
+    const password = formData.get("password") as string | null;
+    const rememberMe = !!formData.get("remember");
+
+    if (!email || !password) {
+        throw new Error("Email and password are required");
+    }
+
+    await auth.api.signInEmail({
+        body: { email, password, rememberMe },
+    });
+
+    redirect("/dashboard");
+}
+
+export async function signInActionWithState(
     prevState: { error: string | null },
     formData: FormData,
 ) {
     try {
-        const email = formData.get("email") as string | null;
-        const password = formData.get("password") as string | null;
-        const rememberMe = !!formData.get("remember");
-
-        if (!email || !password) {
-            return { error: "Email and password are required" };
-        }
-
-        await auth.api.signInEmail({
-            body: { email, password, rememberMe },
-        });
-
-        redirect("/dashboard");
+        await signInAction(formData);
+        return { error: null };
     } catch (error) {
         // Generic error message
         if (!(error instanceof Error)) {
